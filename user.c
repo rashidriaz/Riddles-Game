@@ -121,7 +121,8 @@ typedef struct
  * 2. Review
  * 3. Email ID
  */
-typedef struct{
+typedef struct
+{
     int rating;
     char comment[1000];
     char email[50];
@@ -140,7 +141,7 @@ typedef struct{
  * 
  * ----------------------------
  */
-user active_user = {"", "", "", "", 0, 0};
+user active_user;
 /**
  * ----------------------------------
  * 
@@ -275,14 +276,18 @@ int login()
             if (emailbool == 0 && passwordbool == 0)
             {
                 fclose(userptr);
-                active_user.have_email[50] = retrievedinfo.have_email[50];
-                active_user.have_name[50] = retrievedinfo.have_name[50];
+                strcpy(active_user.have_email, retrievedinfo.have_email);
+                strcpy(active_user.have_name, retrievedinfo.have_name);
+                strcpy(active_user.require_password, retrievedinfo.require_password);
+                strcpy(active_user.gender, retrievedinfo.gender);
+
                 for (int i = 0; i < 1000; i++)
                 {
-                    active_user.riddle_number[i] == retrievedinfo.riddle_number[i];
+                    active_user.riddle_number[i] = retrievedinfo.riddle_number[i];
                 }
 
                 active_user.success = retrievedinfo.success;
+
                 printf("\n\t\t\t\t\tLogin Successfully!\n\n\t\t\t\t\t\tWELCOME %s!\n", retrievedinfo.have_name);
                 printf("\n\n_________________________________________________________________________________________________________\n\n");
                 return 1;
@@ -457,11 +462,12 @@ void play()
         count++;
     }
     total_riddles_played = get_no_of_riddles_played();
-    active_user.success = active_user.success + points;
+    active_user.success += points;
     update_user_record();
+    points = (((float)active_user.success / (float)total_riddles_played) * 100);
     printf("\n\n_________________________________________________________________________________________________________\n\n");
 
-    printf("\nYour Current Success Percentage is:%.2f", (points = ((float)active_user.success / (float)total_riddles_played) * 100));
+    printf("\nYour Current Success Percentage is:%.2f", points);
 
     printf("\n\n_________________________________________________________________________________________________________\n\n");
     int play_again = 0;
@@ -481,7 +487,7 @@ void play()
             suggest_a_riddle();
         }
     }
-    review();
+    // review();
 }
 
 /**
@@ -554,9 +560,14 @@ void update_user_record()
             bool email_match = strcmp(existing.have_email, active_user.have_email);
             if (email_match == 0)
             {
+                for (int i = 0; i < 1000; i++)
+                {
+                    existing.riddle_number[i] = active_user.riddle_number[i];
+                }
+                existing.success = active_user.success;
+
                 fseek(userptr, ((-1) * (sizeof(user))), SEEK_CUR);
-                fwrite(&active_user, sizeof(user), 1, userptr);
-                fclose(userptr);
+                fwrite(&existing, sizeof(user), 1, userptr);
                 break;
             }
             fread(&existing, sizeof(user), 1, userptr);
@@ -621,6 +632,7 @@ void suggest_a_riddle()
         scanf(" %d", &new_riddle.correct_option);
         fwrite(&new_riddle, sizeof(suggested_riddle), 1, suggestptr);
         fclose(suggestptr);
+        printf("\n \t\t\t\t\tThanks For your kind suggestion!!!\n");
     }
 }
 /**
@@ -630,14 +642,16 @@ void suggest_a_riddle()
  * @param: NULL
  * @return: NULL
  */
-void review(){
+void review()
+{
     FILE *reviewptr;
     reviews new = {0, " ", " "}, existing;
     int count = 0;
     if ((reviewptr = fopen("review.dat", "rb+")) == NULL)
     {
         printf("\nCannot Open This File\n");
-    }else
+    }
+    else
     {
         strcpy(new.email, active_user.have_email);
         fread(&existing, sizeof(reviews), 1, reviewptr);
@@ -649,7 +663,7 @@ void review(){
             }
             count++;
         }
-        rating:
+    rating:
         printf("\nRate Us Between 1 - 5:\n");
         scanf("%d", &new.rating);
         if (new.rating < 1 || new.rating > 5)
@@ -662,7 +676,7 @@ void review(){
         fseek(reviewptr, (count * sizeof(reviews)), SEEK_SET);
         fwrite(&new, sizeof(reviews), 1, reviewptr);
         fclose(reviewptr);
-        }
+    }
 }
 /**
  * ---------------------------------

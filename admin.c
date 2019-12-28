@@ -52,7 +52,7 @@ typedef struct
     char option2[50];
     char option3[50];
     char option4[50];
-    char correct_option[50];
+    int correct_option;
 } riddle;
 /**
  * @struct: suggested_riddle
@@ -133,10 +133,10 @@ int main()
         all_suggestions();
         break;
     case 5:
-        bad_reviews();
+        // bad_reviews();
         break;
     case 6:
-        all_reviews();
+        // all_reviews();
         break;
     }
 
@@ -227,8 +227,8 @@ int main_menu()
 {
     int option;
     printf("\n\n_________________________________________________________________________________________________________\n\n");
-    printf("\nPress \"1\" To add another Admin:");
-    printf("\nPress \"2\" To change the riddles:");
+    printf("\n Press \"1\" To add another Admin:");
+    printf("\n Press \"2\" To change the riddles:");
     printf("\n Press \"3\" To see latest suggestions");
     printf("\n Press \"4\" To see All suggestions");
     printf("\n Press \"5\" For latest Reviews");
@@ -357,7 +357,7 @@ int riddle_menu()
 void add_riddle()
 {
     // defining struct
-    riddle new_riddle = {0, "", "", "", "", "", ""}, existing_riddle = {0, "", "", "", "", "", ""};
+    riddle new_riddle = {0, "", "", "", "", "", 0}, existing_riddle = {0, "", "", "", "", "", 0};
     //file pointer
     FILE *riddleptr;
 
@@ -407,7 +407,7 @@ void add_riddle()
         printf("\n Enter Option 4:\t");
         scanf(" %[^\n]%*c", new_riddle.option4);
         printf("\n Enter Correct Option:\t");
-        scanf(" %[^\n]%*c", new_riddle.correct_option);
+        scanf(" %d", &new_riddle.correct_option);
         printf("\n\n_________________________________________________________________________________________________________\n\n");
         riddleptr = fopen("riddles.dat", "ab");
         fwrite(&new_riddle, sizeof(riddle), 1, riddleptr);
@@ -468,7 +468,7 @@ void update_riddle()
             printf("\n Enter Option 4:\t");
             scanf(" %[^\n]%*c", existing_riddle.option4);
             printf("\n Enter Correct Option:\t");
-            scanf(" %[^\n]%*c", existing_riddle.correct_option);
+            scanf(" %d", &existing_riddle.correct_option);
             printf("\n\n_________________________________________________________________________________________________________\n\n");
             fseek(riddleptr, (existing_riddle.number - 1) * sizeof(riddle), SEEK_SET);
             fwrite(&existing_riddle, sizeof(riddle), 1, riddleptr);
@@ -490,9 +490,9 @@ void update_riddle()
  * @param: NULL
  * @return: NULL
  */
-void latest_suggestions()
-{
+void latest_suggestions(){
     FILE *suggestedptr;
+    riddle new_riddle;
     suggested_riddle existing;
     int count = 0;
     if ((suggestedptr = fopen("suggested_riddles.dat", "rb")) == NULL)
@@ -513,37 +513,37 @@ void latest_suggestions()
                 printf("\n Option 2:\t %s", existing.option2);
                 printf("\n Option 3:\t %s", existing.option3);
                 printf("\n Option 4:\t %s", existing.option4);
-                printf("\nCorrect Option:\t %s", existing.correct_option);
-                printf("Would You Like to add this riddle:\n\n \"y\" - Yes\t\"N\" - No:\t");
+                printf("\nCorrect Option:\t %d", existing.correct_option);
+                printf("\n\nWould You Like to add this riddle:\n\n \"y\" - Yes\t\"N\" - No:\t");
                 scanf(" %c", &option);
                 if (option == 'y' || option == 'Y')
                 {
                     FILE *riddleptr;
-                    riddle new;
+                    
                     if ((riddleptr = fopen("riddles.dat", "ab")) == NULL)
                     {
                         printf("\n Cannot Open File\n");
                     }
                     else
                     {
-                        new.number = get_no_of_riddles() + 1;
-                        strcpy(new.statement, existing.statement);
-                        strcpy(new.option1, existing.option1);
-                        strcpy(new.option2, existing.option2);
-                        strcpy(new.option3, existing.option3);
-                        strcpy(new.option4, existing.option4);
-                        int correct_option = existing.correct_option;
-                        // new.correct_option = correct_option;
-                        fwrite(&new, sizeof(riddle), 1, riddleptr);
+                        new_riddle.number = get_no_of_riddles() + 1;
+                        strcpy(new_riddle.statement, existing.statement);
+                        strcpy(new_riddle.option1, existing.option1);
+                        strcpy(new_riddle.option2, existing.option2);
+                        strcpy(new_riddle.option3, existing.option3);
+                        strcpy(new_riddle.option4, existing.option4);
+                        new_riddle.correct_option = existing.correct_option;
+                        fwrite(&new_riddle, sizeof(riddle), 1, riddleptr);
                         fclose(riddleptr);
                     }
                 }
 
                 existing.status = 0;
-                fseek(suggestedptr, (count * sizeof(reviews)), SEEK_SET);
-                fwrite(&existing, sizeof(reviews), 1, suggestedptr);
+                fseek(suggestedptr, ((-1) * sizeof(suggested_riddle)), SEEK_CUR);
+                fwrite(&existing, sizeof(suggested_riddle), 1, suggestedptr);
             }
             count++;
+            fread(&existing, sizeof(suggested_riddle), 1, suggestedptr);
         }
     }
     fclose(suggestedptr);
@@ -559,7 +559,7 @@ void latest_suggestions()
  * @param: NULL
  * @return: NULL
  */
-void latest_suggestions()
+void all_suggestions()
 {
     FILE *suggestedptr;
     suggested_riddle existing;
