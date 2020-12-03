@@ -1,1 +1,2 @@
-pf_project
+developed in c language, this is a command-line based riddle game where a user will be able to create their account against which a player profile will be maintained and updated as the user progresses in the game.it is ensured that any riddle will not be repeated to the same user. A user has an option to suggest the addition of a new riddle too.
+On the other hand, there is an admin portal, where the admin will be able to sign. the responsibilities of the admin include creating someone else admin, approving, or rejecting riddles suggested by the user. Adding new Riddles, Updating an existing riddle, and deleting any existing riddle.
